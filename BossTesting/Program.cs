@@ -1,4 +1,4 @@
-﻿using CounterStrikeSharp.API;
+using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Memory;
 using CounterStrikeSharp.API.Modules.Utils;
@@ -109,17 +109,34 @@ namespace EntBossHP
             var players = Utilities.GetPlayers().Where(p => p.Team == CsTeam.CounterTerrorist).ToList();
             int activePlayers = players.Count(p => ClientLastShootHitBox[p] > TimeWatch - 7.0 && ClientEntityHit[p] == entity && name == ClientEntityNameHit[p]);
 
+            // Menentukan jumlah bar berdasarkan HP
+            int barCount = hp >= 1000 ? 10 :
+                           hp >= 900 ? 9 :
+                           hp >= 800 ? 8 :
+                           hp >= 700 ? 7 :
+                           hp >= 600 ? 6 :
+                           hp >= 500 ? 5 :
+                           hp >= 400 ? 4 :
+                           hp >= 300 ? 3 :
+                           hp >= 200 ? 2 :
+                           hp >= 100 ? 1 : 0;
+
+            string healthBar = new string('▯', barCount);
+            string displayText = barCount > 0 ? $"{name}: {hp}\n{healthBar}" : $"{name}: {hp}";
+
             if (activePlayers > players.Count / 2)
             {
-                players.ForEach(p => p.PrintToCenter($"{name}: {hp}"));
+                players.ForEach(p => p.PrintToCenter(displayText));
             }
             else
             {
                 players.Where(p => ClientLastShootHitBox[p] > TimeWatch - 7.0f && ClientEntityHit[p] == entity && name == ClientEntityNameHit[p])
-                       .ToList().ForEach(p => p.PrintToCenter($"{name}: {hp}"));
+                       .ToList().ForEach(p => p.PrintToCenter(displayText));
             }
             LastForceShowBossHP = TimeWatch;
         }
+
+
 
         private static CCSPlayerController? GetPlayer(CEntityInstance? instance)
         {
